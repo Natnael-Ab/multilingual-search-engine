@@ -1,0 +1,9 @@
+Public Health and Disease Prevention
+Health
+Public health focuses on protecting and improving the health of entire populations, rather than treating individual patients. It encompasses a wide range of activities — epidemiological surveillance, health promotion, disease prevention, environmental health, and emergency preparedness — that collectively reduce the burden of illness and premature death. The COVID-19 pandemic dramatically illustrated both the importance of strong public health systems and the consequences of inadequate preparation.
+
+Infectious diseases spread through communities when pathogens — bacteria, viruses, fungi, or parasites — are transmitted from person to person or through environmental contamination. Vaccination is the most powerful tool available for preventing infectious disease, having eradicated smallpox and nearly eliminated polio worldwide. Sanitation — clean water supply, sewage treatment, and hygiene education — prevents a wide range of diseases that killed millions historically.
+
+Epidemiologists study patterns of disease occurrence to identify causes, risk factors, and effective interventions. When an outbreak occurs, public health teams investigate the source, identify those exposed, and implement control measures to stop transmission. Quarantine and isolation, contact tracing, and targeted vaccination campaigns are among the tools used to control epidemic spread.
+
+Non-communicable diseases — heart disease, cancer, diabetes, and chronic respiratory conditions — now cause the majority of deaths worldwide. These conditions are largely preventable through healthy lifestyles: regular physical activity, balanced nutrition, avoidance of tobacco and excessive alcohol, and management of stress and mental health. Health systems must balance the demands of treating existing disease with investments in prevention that reduce future illness.

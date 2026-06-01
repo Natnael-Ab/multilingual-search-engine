@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}LexisSearch — Multilingual IR System{% endblock %}</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <!-- Custom styles -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+<!-- ── Navigation ──────────────────────────────────────────────────────────── -->
+<nav class="navbar navbar-expand-lg sticky-top" id="main-nav">
+  <div class="container">
+    <!-- Brand -->
+    <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('index') }}">
+      <div class="brand-icon">
+        <i class="bi bi-search"></i>
+      </div>
+      <span class="brand-name">LexisSearch</span>
+      <span class="brand-badge">IR Lab</span>
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navMenu">
+      <!-- Quick search in navbar (hidden on home page) -->
+      {% if request.endpoint != 'index' %}
+      <form class="d-flex flex-grow-1 mx-4" action="{{ url_for('search') }}" method="get" id="nav-search-form">
+        <div class="nav-search-wrapper flex-grow-1">
+          <i class="bi bi-search nav-search-icon"></i>
+          <input type="text" name="q" class="form-control nav-search-input"
+                 placeholder="Search in English or Amharic…"
+                 value="{{ request.args.get('q', '') }}"
+                 autocomplete="off" />
+          <input type="hidden" name="ranking" value="{{ request.args.get('ranking', 'bm25') }}" />
+        </div>
+        <button type="submit" class="btn btn-primary ms-2 px-3">Search</button>
+      </form>
+      {% endif %}
+
+      <ul class="navbar-nav ms-auto align-items-center gap-2">
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}"
+             href="{{ url_for('index') }}">
+            <i class="bi bi-house"></i> Home
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint == 'evaluation' %}active{% endif %}"
+             href="{{ url_for('evaluation') }}">
+            <i class="bi bi-bar-chart-line"></i> Evaluation
+          </a>
+        </li>
+        <!-- Dark / Light mode toggle -->
+        <li class="nav-item">
+          <button class="btn btn-icon theme-toggle" id="themeToggle" title="Toggle dark mode">
+            <i class="bi bi-moon-stars" id="themeIcon"></i>
+          </button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Page Content ────────────────────────────────────────────────────────── -->
+<main>
+  {% block content %}{% endblock %}
+</main>
+
+<!-- ── Footer ─────────────────────────────────────────────────────────────── -->
+<footer class="site-footer mt-auto">
+  <div class="container">
+    <div class="row align-items-center py-4">
+      <div class="col-md-4">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <div class="brand-icon brand-icon-sm">
+            <i class="bi bi-search"></i>
+          </div>
+          <span class="fw-600 text-gradient">LexisSearch</span>
+        </div>
+        <p class="footer-desc">
+          A bilingual Information Retrieval system supporting English and Amharic, built for academic research and multilingual document search.
+        </p>
+      </div>
+      <div class="col-md-4 text-center">
+        <div class="footer-stats">
+          <span class="footer-stat">
+            <i class="bi bi-file-text"></i>
+            {% if stats %}{{ stats.total_documents }}{% else %}26{% endif %} Documents
+          </span>
+          <span class="footer-sep">·</span>
+          <span class="footer-stat">
+            <i class="bi bi-translate"></i> 2 Languages
+          </span>
+          <span class="footer-sep">·</span>
+          <span class="footer-stat">
+            <i class="bi bi-cpu"></i> TF-IDF + BM25
+          </span>
+        </div>
+      </div>
+      <div class="col-md-4 text-end">
+        <div class="footer-links">
+          <a href="{{ url_for('index') }}" class="footer-link">Search</a>
+          <a href="{{ url_for('evaluation') }}" class="footer-link">Evaluation</a>
+          <a href="{{ url_for('api_stats') }}" class="footer-link" target="_blank">API</a>
+        </div>
+        <p class="footer-copy">
+          Multilingual IR System &mdash; University Project
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Custom scripts -->
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

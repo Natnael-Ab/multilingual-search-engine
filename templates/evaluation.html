@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+
+{% block title %}Evaluation Dashboard — LexisSearch{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+  <!-- Page header -->
+  <div class="eval-header text-center mb-5">
+    <div class="hero-badge mx-auto">
+      <i class="bi bi-bar-chart-line"></i> Evaluation Dashboard
+    </div>
+    <h1 class="eval-title mt-3">System Evaluation</h1>
+    <p class="eval-subtitle">
+      Precision, Recall, F1, and P@5 metrics computed on {{ tfidf_results | length }} standardized test queries
+      with ground-truth relevance judgments.
+    </p>
+  </div>
+
+  <!-- ── Summary cards ──────────────────────────────────────────────────────── -->
+  <div class="row g-4 mb-5">
+
+    <!-- BM25 summary -->
+    <div class="col-md-6">
+      <div class="eval-summary-card eval-card-bm25">
+        <div class="eval-card-header">
+          <div class="eval-card-icon"><i class="bi bi-cpu"></i></div>
+          <h2 class="eval-card-title">BM25</h2>
+          <span class="eval-card-badge">Best Match 25</span>
+        </div>
+        <div class="eval-metrics-grid">
+          <div class="eval-metric">
+            <div class="eval-metric-val">{{ (bm25_summary.mean_precision * 100) | round(1) }}%</div>
+            <div class="eval-metric-name">Mean Precision</div>
+          </div>
+          <div class="eval-metric">
+            <div class="eval-metric-val">{{ (bm25_summary.mean_recall * 100) | round(1) }}%</div>
+            <div class="eval-metric-name">Mean Recall</div>
+          </div>
+          <div class="eval-metric">
+            <div class="eval-metric-val">{{ (bm25_summary.mean_f1 * 100) | round(1) }}%</div>
+            <div class="eval-metric-name">Mean F1</div>
+          </div>
+          <div class="eval-metric">
+            <div class="eval-metric-val">{{ (bm25_summary.mean_precision_at_5 * 100) | round(1) }}%</div>
+            <div class="eval-metric-name">P@5</div>
+          </div>
+          <div class="eval-metric eval-metric-wide">
+            <div class="eval-metric-val text-gradient">{{ (bm25_summary.map * 100) | round(1) }}%</div>
+            <div class="eval-metric-name">MAP (Mean Avg. Precision)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TF-IDF summary -->
+    <div class="col-md-6">
+      <div class="eval-summary-card eval-card-tfidf">
+        <div class="eval-card-header">
+          <div class="eval-card-icon eval-card-icon-tfidf"><i class="bi bi-graph-up"></i></div>
+          <h2 class="eval-card-title">TF-IDF</h2>
+          <span class="eval-card-badge eval-card-badge-tfidf">Term Frequency–Inverse DF</span>
+        </div>
+        <div class="eval-metrics-grid">
+          <div class="eval-metric">
+            <div class="eval-metric-val">{{ (tfidf_summary.mean_precision * 100) | round(1) }}%</div>
+            <div class="eval-metric-name">Mean Precision</div>
+          </div>
+          <div class="eval-metric">
+            <div class="eval-metric-val">{{ (tfidf_summary.mean_recall * 100) | round(1) }}%</div>
+            <div class="eval-metric-name">Mean Recall</div>
+          </div>
+          <div class="eval-metric">
+            <div class="eval-metric-val">{{ (tfidf_summary.mean_f1 * 100) | round(1) }}%</div>
+            <div class="eval-metric-name">Mean F1</div>
+          </div>
+          <div class="eval-metric">
+            <div class="eval-metric-val">{{ (tfidf_summary.mean_precision_at_5 * 100) | round(1) }}%</div>
+            <div class="eval-metric-name">P@5</div>
+          </div>
+          <div class="eval-metric eval-metric-wide">
+            <div class="eval-metric-val text-gradient-purple">{{ (tfidf_summary.map * 100) | round(1) }}%</div>
+            <div class="eval-metric-name">MAP (Mean Avg. Precision)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Metric explanation ──────────────────────────────────────────────────── -->
+  <div class="metric-explain-row row g-3 mb-5">
+    <div class="col-sm-6 col-lg-3">
+      <div class="metric-explain-card">
+        <div class="metric-explain-icon"><i class="bi bi-bullseye"></i></div>
+        <h5>Precision</h5>
+        <p>Of all documents returned, what fraction were actually relevant?</p>
+        <code>|Ret ∩ Rel| / |Ret|</code>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="metric-explain-card">
+        <div class="metric-explain-icon"><i class="bi bi-funnel"></i></div>
+        <h5>Recall</h5>
+        <p>Of all relevant documents that exist, how many were found?</p>
+        <code>|Ret ∩ Rel| / |Rel|</code>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="metric-explain-card">
+        <div class="metric-explain-icon"><i class="bi bi-balance-scale"></i></div>
+        <h5>F1 Score</h5>
+        <p>Harmonic mean of precision and recall — balances both.</p>
+        <code>2·P·R / (P+R)</code>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="metric-explain-card">
+        <div class="metric-explain-icon"><i class="bi bi-list-ol"></i></div>
+        <h5>P@5</h5>
+        <p>Precision of only the top 5 results — reflects user experience.</p>
+        <code>|top-5 ∩ Rel| / 5</code>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Per-query results table ──────────────────────────────────────────────── -->
+  <div class="eval-table-section">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <h3 class="eval-section-title">Per-Query Results</h3>
+      <!-- Tab buttons -->
+      <div class="eval-tab-btns">
+        <button class="eval-tab-btn active" onclick="showTab('bm25')" id="tab-bm25">BM25</button>
+        <button class="eval-tab-btn" onclick="showTab('tfidf')" id="tab-tfidf">TF-IDF</button>
+      </div>
+    </div>
+
+    <!-- BM25 table -->
+    <div id="table-bm25">
+      <div class="table-responsive">
+        <table class="table eval-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Query</th>
+              <th>Retrieved</th>
+              <th>Hits</th>
+              <th>Precision</th>
+              <th>Recall</th>
+              <th>F1</th>
+              <th>P@5</th>
+              <th>AP</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in bm25_results %}
+            <tr>
+              <td class="text-muted">{{ loop.index }}</td>
+              <td><span class="eval-query-text" title="{{ r.query }}">{{ r.query[:35] }}{% if r.query|length > 35 %}…{% endif %}</span></td>
+              <td>{{ r.retrieved }}</td>
+              <td>
+                <span class="eval-hits {% if r.hits > 0 %}eval-hits-good{% endif %}">
+                  {{ r.hits }}/{{ r.relevant_total }}
+                </span>
+              </td>
+              <td><div class="metric-cell">
+                <div class="metric-mini-bar"><div class="metric-mini-fill" style="width:{{ (r.precision*100)|round(0) }}%"></div></div>
+                {{ (r.precision*100)|round(1) }}%
+              </div></td>
+              <td><div class="metric-cell">
+                <div class="metric-mini-bar"><div class="metric-mini-fill metric-fill-r" style="width:{{ (r.recall*100)|round(0) }}%"></div></div>
+                {{ (r.recall*100)|round(1) }}%
+              </div></td>
+              <td><strong>{{ (r.f1*100)|round(1) }}%</strong></td>
+              <td>{{ (r.precision_at_5*100)|round(1) }}%</td>
+              <td>{{ (r.avg_precision*100)|round(1) }}%</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot>
+            <tr class="eval-table-foot">
+              <td colspan="4"><strong>Mean (Macro Average)</strong></td>
+              <td><strong>{{ (bm25_summary.mean_precision*100)|round(1) }}%</strong></td>
+              <td><strong>{{ (bm25_summary.mean_recall*100)|round(1) }}%</strong></td>
+              <td><strong>{{ (bm25_summary.mean_f1*100)|round(1) }}%</strong></td>
+              <td><strong>{{ (bm25_summary.mean_precision_at_5*100)|round(1) }}%</strong></td>
+              <td><strong>{{ (bm25_summary.map*100)|round(1) }}%</strong></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- TF-IDF table -->
+    <div id="table-tfidf" style="display:none">
+      <div class="table-responsive">
+        <table class="table eval-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Query</th>
+              <th>Retrieved</th>
+              <th>Hits</th>
+              <th>Precision</th>
+              <th>Recall</th>
+              <th>F1</th>
+              <th>P@5</th>
+              <th>AP</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in tfidf_results %}
+            <tr>
+              <td class="text-muted">{{ loop.index }}</td>
+              <td><span class="eval-query-text" title="{{ r.query }}">{{ r.query[:35] }}{% if r.query|length > 35 %}…{% endif %}</span></td>
+              <td>{{ r.retrieved }}</td>
+              <td>
+                <span class="eval-hits {% if r.hits > 0 %}eval-hits-good{% endif %}">
+                  {{ r.hits }}/{{ r.relevant_total }}
+                </span>
+              </td>
+              <td><div class="metric-cell">
+                <div class="metric-mini-bar"><div class="metric-mini-fill metric-fill-tfidf" style="width:{{ (r.precision*100)|round(0) }}%"></div></div>
+                {{ (r.precision*100)|round(1) }}%
+              </div></td>
+              <td><div class="metric-cell">
+                <div class="metric-mini-bar"><div class="metric-mini-fill metric-fill-r" style="width:{{ (r.recall*100)|round(0) }}%"></div></div>
+                {{ (r.recall*100)|round(1) }}%
+              </div></td>
+              <td><strong>{{ (r.f1*100)|round(1) }}%</strong></td>
+              <td>{{ (r.precision_at_5*100)|round(1) }}%</td>
+              <td>{{ (r.avg_precision*100)|round(1) }}%</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot>
+            <tr class="eval-table-foot">
+              <td colspan="4"><strong>Mean (Macro Average)</strong></td>
+              <td><strong>{{ (tfidf_summary.mean_precision*100)|round(1) }}%</strong></td>
+              <td><strong>{{ (tfidf_summary.mean_recall*100)|round(1) }}%</strong></td>
+              <td><strong>{{ (tfidf_summary.mean_f1*100)|round(1) }}%</strong></td>
+              <td><strong>{{ (tfidf_summary.mean_precision_at_5*100)|round(1) }}%</strong></td>
+              <td><strong>{{ (tfidf_summary.map*100)|round(1) }}%</strong></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Architecture note ──────────────────────────────────────────────────── -->
+  <div class="arch-note mt-5">
+    <h4><i class="bi bi-info-circle"></i> How Evaluation Works</h4>
+    <p>
+      Ground-truth relevance judgments were manually assigned for {{ tfidf_results | length }} test queries.
+      Each query has a set of documents that a human annotator judged as relevant.
+      The system runs each query with a given ranking method, retrieves up to 20 results,
+      and computes the standard IR metrics above.
+    </p>
+    <p>
+      <strong>Cross-lingual queries</strong> (e.g. <em>"health technology"</em>) include both English
+      and Amharic documents in their ground truth, testing the system's ability to retrieve
+      relevant documents across language boundaries.
+    </p>
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showTab(name) {
+  ['bm25','tfidf'].forEach(n => {
+    document.getElementById('table-' + n).style.display = n === name ? 'block' : 'none';
+    document.getElementById('tab-' + n).classList.toggle('active', n === name);
+  });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}LexisSearch — Multilingual Information Retrieval{% endblock %}
+
+{% block content %}
+
+<!-- ── Hero Section ────────────────────────────────────────────────────────── -->
+<section class="hero-section">
+  <div class="hero-bg-decoration"></div>
+  <div class="hero-bg-decoration hero-bg-2"></div>
+
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 col-xl-7 text-center">
+
+        <!-- Badge -->
+        <div class="hero-badge">
+          <i class="bi bi-translate"></i>
+          Multilingual IR System
+        </div>
+
+        <!-- Headline -->
+        <h1 class="hero-title">
+          Search in
+          <span class="text-gradient">English</span>
+          &amp;
+          <span class="text-gradient-am">Amharic</span>
+        </h1>
+        <p class="hero-subtitle">
+          A bilingual search engine that retrieves documents in both languages —
+          query in English, find Amharic results. Query in Amharic, find English documents.
+        </p>
+
+        <!-- Search Form -->
+        <div class="search-card">
+          <form action="{{ url_for('search') }}" method="get" id="main-search-form">
+
+            <!-- Search bar -->
+            <div class="search-bar-wrapper position-relative">
+              <i class="bi bi-search search-bar-icon"></i>
+              <input
+                type="text"
+                name="q"
+                id="main-search-input"
+                class="form-control search-bar-input"
+                placeholder='Try "health technology" or "ጤና ቴክኖሎጂ"'
+                autocomplete="off"
+                autofocus
+              />
+              <button type="submit" class="btn btn-primary search-bar-btn" id="search-btn">
+                <span class="btn-text">Search</span>
+                <i class="bi bi-arrow-right"></i>
+              </button>
+              <!-- Autocomplete dropdown -->
+              <div class="autocomplete-dropdown" id="autocomplete-dropdown"></div>
+            </div>
+
+            <!-- Options row -->
+            <div class="search-options">
+              <div class="search-option-group">
+                <label class="search-option-label">
+                  <i class="bi bi-trophy"></i> Ranking
+                </label>
+                <div class="ranking-selector">
+                  <button type="button" class="rank-btn active" data-value="bm25" onclick="selectRanking(this)">
+                    BM25
+                  </button>
+                  <button type="button" class="rank-btn" data-value="tfidf" onclick="selectRanking(this)">
+                    TF-IDF
+                  </button>
+                  <input type="hidden" name="ranking" id="ranking-input" value="bm25" />
+                </div>
+              </div>
+
+              <div class="search-option-group">
+                <label class="search-option-label">
+                  <i class="bi bi-diagram-3"></i> Query Expansion
+                </label>
+                <label class="toggle-switch">
+                  <input type="checkbox" name="expand" value="1" id="expand-toggle" checked />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- Suggested queries -->
+        <div class="suggested-queries">
+          <span class="suggested-label">Try:</span>
+          {% set suggestions = [
+            ('health technology', 'en'),
+            ('doctor hospital', 'en'),
+            ('ጤና ሕክምና', 'am'),
+            ('education university', 'en'),
+            ('ቴክኖሎጂ ኮምፒዩተር', 'am'),
+            ('climate environment', 'en'),
+            ('ስፖርት ውድድር', 'am'),
+            ('artificial intelligence', 'en'),
+          ] %}
+          {% for q, lang in suggestions %}
+          <a href="{{ url_for('search', q=q) }}"
+             class="suggested-chip {% if lang == 'am' %}chip-am{% endif %}">
+            {{ q }}
+          </a>
+          {% endfor %}
+        </div>
+
+        <!-- Recent searches -->
+        {% if recent_searches %}
+        <div class="recent-searches">
+          <span class="recent-label"><i class="bi bi-clock-history"></i> Recent:</span>
+          {% for s in recent_searches %}
+          <a href="{{ url_for('search', q=s) }}" class="recent-chip">{{ s }}</a>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Feature cards ───────────────────────────────────────────────────────── -->
+<section class="features-section">
+  <div class="container">
+    <div class="row g-4">
+
+      <div class="col-md-6 col-lg-3">
+        <div class="feature-card">
+          <div class="feature-icon feature-icon-blue">
+            <i class="bi bi-translate"></i>
+          </div>
+          <h3 class="feature-title">Cross-Lingual</h3>
+          <p class="feature-desc">
+            English queries retrieve Amharic documents and vice versa through bilingual dictionary translation.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-3">
+        <div class="feature-card">
+          <div class="feature-icon feature-icon-purple">
+            <i class="bi bi-cpu"></i>
+          </div>
+          <h3 class="feature-title">TF-IDF &amp; BM25</h3>
+          <p class="feature-desc">
+            Two ranking algorithms. Compare their results and see which finds more relevant documents.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-3">
+        <div class="feature-card">
+          <div class="feature-icon feature-icon-teal">
+            <i class="bi bi-diagram-3"></i>
+          </div>
+          <h3 class="feature-title">Query Expansion</h3>
+          <p class="feature-desc">
+            Automatically adds synonyms to your query to improve recall without changing precision.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-3">
+        <div class="feature-card">
+          <div class="feature-icon feature-icon-orange">
+            <i class="bi bi-bar-chart-line"></i>
+          </div>
+          <h3 class="feature-title">Evaluation</h3>
+          <p class="feature-desc">
+            Precision, Recall, F1, and P@5 metrics with a side-by-side comparison of both ranking methods.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── Index stats bar ─────────────────────────────────────────────────────── -->
+<section class="stats-bar-section">
+  <div class="container">
+    <div class="stats-bar">
+      <div class="stats-item">
+        <span class="stats-num">{{ stats.total_documents }}</span>
+        <span class="stats-label">Documents Indexed</span>
+      </div>
+      <div class="stats-divider"></div>
+      <div class="stats-item">
+        <span class="stats-num">{{ stats.english_docs }}</span>
+        <span class="stats-label">English Docs</span>
+      </div>
+      <div class="stats-divider"></div>
+      <div class="stats-item">
+        <span class="stats-num">{{ stats.amharic_docs }}</span>
+        <span class="stats-label">Amharic Docs</span>
+      </div>
+      <div class="stats-divider"></div>
+      <div class="stats-item">
+        <span class="stats-num">{{ stats.unique_terms }}</span>
+        <span class="stats-label">Unique Terms</span>
+      </div>
+      <div class="stats-divider"></div>
+      <div class="stats-item">
+        <span class="stats-num">{{ stats.avg_doc_length | round(0) | int }}</span>
+        <span class="stats-label">Avg. Doc Length</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

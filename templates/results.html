@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% block title %}"{{ query }}" — LexisSearch Results{% endblock %}
+
+{% block content %}
+
+<!-- ── Results Header ──────────────────────────────────────────────────────── -->
+<div class="results-header">
+  <div class="container">
+    <div class="results-meta">
+
+      <!-- Query info -->
+      <div class="results-query-info">
+        <div class="query-lang-badge {% if query_info.query_language == 'amharic' %}badge-am{% else %}badge-en{% endif %}">
+          <i class="bi bi-translate"></i>
+          {{ 'አማርኛ Query' if query_info.query_language == 'amharic' else 'English Query' }}
+        </div>
+        <h1 class="results-heading">
+          Results for <em>"{{ query }}"</em>
+        </h1>
+        <p class="results-summary">
+          <strong>{{ total }}</strong> result{{ 's' if total != 1 }} found
+          &nbsp;·&nbsp;
+          <span class="method-chip method-chip-{{ ranking_method }}">
+            <i class="bi bi-cpu"></i> {{ ranking_method.upper() }}
+          </span>
+          &nbsp;·&nbsp;
+          <span class="text-muted">{{ search_stats.retrieval_time_ms }} ms</span>
+          {% if use_expansion %}
+          &nbsp;·&nbsp;
+          <span class="expansion-chip"><i class="bi bi-diagram-3"></i> Expansion ON</span>
+          {% endif %}
+        </p>
+      </div>
+
+      <!-- Refine panel -->
+      <form action="{{ url_for('search') }}" method="get" class="refine-form" id="refine-form">
+        <input type="hidden" name="q" value="{{ query }}" />
+
+        <div class="refine-group">
+          <label class="refine-label">Ranking</label>
+          <div class="ranking-selector ranking-selector-sm">
+            <button type="button" class="rank-btn {% if ranking_method == 'bm25' %}active{% endif %}"
+                    data-value="bm25" onclick="selectRankingRefine(this)">BM25</button>
+            <button type="button" class="rank-btn {% if ranking_method == 'tfidf' %}active{% endif %}"
+                    data-value="tfidf" onclick="selectRankingRefine(this)">TF-IDF</button>
+            <input type="hidden" name="ranking" id="refine-ranking" value="{{ ranking_method }}" />
+          </div>
+        </div>
+
+        <div class="refine-group">
+          <label class="refine-label">Expansion</label>
+          <label class="toggle-switch toggle-switch-sm">
+            <input type="checkbox" name="expand" value="1"
+                   {% if use_expansion %}checked{% endif %}
+                   onchange="this.form.submit()" />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-sm btn-outline-primary">Apply</button>
+      </form>
+
+    </div>
+
+    <!-- Query expansion info strip -->
+    {% if query_info.cross_tokens %}
+    <div class="expansion-strip">
+      <i class="bi bi-arrow-right-circle"></i>
+      <span>Also searching for cross-language terms:</span>
+      {% for tok in query_info.cross_tokens[:8] %}
+      <span class="expansion-term">{{ tok }}</span>
+      {% endfor %}
+      {% if query_info.cross_tokens | length > 8 %}
+      <span class="text-muted">+{{ query_info.cross_tokens | length - 8 }} more</span>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- ── Results body ────────────────────────────────────────────────────────── -->
+<div class="container py-4">
+  <div class="row g-0">
+
+    <!-- Results list -->
+    <div class="col-lg-9">
+
+      {% if results %}
+        <div class="results-list" id="results-list">
+          {% for result in results %}
+          <article class="result-card" style="animation-delay: {{ loop.index0 * 0.06 }}s">
+
+            <!-- Top row: lang + category badges, rank number -->
+            <div class="result-card-top">
+              <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="lang-badge {% if result.language == 'amharic' %}lang-badge-am{% else %}lang-badge-en{% endif %}">
+                  <i class="bi bi-circle-fill"></i>
+                  {{ 'አማርኛ' if result.language == 'amharic' else 'English' }}
+                </span>
+                <span class="category-badge">{{ result.category }}</span>
+                <span class="method-chip method-chip-sm method-chip-{{ result.ranking_method | lower }}">
+                  {{ result.ranking_method }}
+                </span>
+              </div>
+              <span class="result-rank">#{{ loop.index + (page - 1) * per_page }}</span>
+            </div>
+
+            <!-- Title -->
+            <h2 class="result-title">
+              <a href="{{ url_for('document', doc_id=result.id, q=query, ranking=ranking_method) }}"
+                 class="result-title-link">
+                {{ result.title }}
+              </a>
+            </h2>
+
+            <!-- Snippet -->
+            <p class="result-snippet">{{ result.snippet }}</p>
+
+            <!-- Bottom row: score + open button -->
+            <div class="result-card-bottom">
+              <div class="d-flex align-items-center gap-3">
+                <div class="score-display">
+                  <span class="score-label">Score</span>
+                  <span class="score-bar-wrap">
+                    <span class="score-bar" style="width: {{ [result.score * 40, 100] | min }}%"></span>
+                  </span>
+                  <span class="score-value">{{ result.score }}</span>
+                </div>
+                <span class="result-doc-id text-muted small">{{ result.id }}</span>
+              </div>
+              <a href="{{ url_for('document', doc_id=result.id, q=query, ranking=ranking_method) }}"
+                 class="btn btn-sm btn-open-doc">
+                <i class="bi bi-file-text"></i>
+                Open Document
+                <i class="bi bi-arrow-right"></i>
+              </a>
+            </div>
+
+          </article>
+          {% endfor %}
+        </div>
+
+      {% else %}
+        <!-- Empty state -->
+        <div class="empty-state">
+          <div class="empty-icon"><i class="bi bi-search"></i></div>
+          <h3>No results found</h3>
+          <p>No documents matched <em>"{{ query }}"</em>. Try different keywords or toggle query expansion.</p>
+          <a href="{{ url_for('index') }}" class="btn btn-primary">New Search</a>
+        </div>
+      {% endif %}
+
+      <!-- Pagination -->
+      {% if total_pages > 1 %}
+      <nav class="pagination-nav" aria-label="Search results pages">
+        <ul class="pagination justify-content-center">
+
+          <li class="page-item {% if page == 1 %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('search', q=query, ranking=ranking_method, expand='1' if use_expansion else '0', page=page-1) }}">
+              <i class="bi bi-chevron-left"></i>
+            </a>
+          </li>
+
+          {% for p in range(1, total_pages + 1) %}
+            {% if p == page %}
+              <li class="page-item active"><span class="page-link">{{ p }}</span></li>
+            {% elif p <= 2 or p >= total_pages - 1 or (p >= page - 2 and p <= page + 2) %}
+              <li class="page-item">
+                <a class="page-link" href="{{ url_for('search', q=query, ranking=ranking_method, expand='1' if use_expansion else '0', page=p) }}">{{ p }}</a>
+              </li>
+            {% elif p == 3 or p == total_pages - 2 %}
+              <li class="page-item disabled"><span class="page-link">…</span></li>
+            {% endif %}
+          {% endfor %}
+
+          <li class="page-item {% if page == total_pages %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('search', q=query, ranking=ranking_method, expand='1' if use_expansion else '0', page=page+1) }}">
+              <i class="bi bi-chevron-right"></i>
+            </a>
+          </li>
+
+        </ul>
+        <p class="pagination-info">Page {{ page }} of {{ total_pages }} ({{ total }} results)</p>
+      </nav>
+      {% endif %}
+
+    </div><!-- /col-lg-9 -->
+
+    <!-- Sidebar -->
+    <div class="col-lg-3 ps-lg-4">
+
+      <!-- Search info panel -->
+      <div class="sidebar-card">
+        <h4 class="sidebar-title"><i class="bi bi-info-circle"></i> Search Info</h4>
+        <dl class="sidebar-dl">
+          <dt>Query</dt>
+          <dd>"{{ query }}"</dd>
+          <dt>Detected Language</dt>
+          <dd>{{ query_info.query_language | title }}</dd>
+          <dt>Ranking Method</dt>
+          <dd>{{ ranking_method.upper() }}</dd>
+          <dt>Query Tokens</dt>
+          <dd class="token-list">
+            {% for tok in query_info.query_tokens[:10] %}
+            <span class="token-chip">{{ tok }}</span>
+            {% endfor %}
+          </dd>
+          {% if query_info.cross_tokens %}
+          <dt>Cross-lang Tokens</dt>
+          <dd class="token-list">
+            {% for tok in query_info.cross_tokens[:8] %}
+            <span class="token-chip token-chip-cross">{{ tok }}</span>
+            {% endfor %}
+          </dd>
+          {% endif %}
+          <dt>Retrieval Time</dt>
+          <dd>{{ search_stats.retrieval_time_ms }} ms</dd>
+          <dt>Docs Searched</dt>
+          <dd>{{ search_stats.documents_indexed }}</dd>
+        </dl>
+      </div>
+
+      <!-- Try another search -->
+      <div class="sidebar-card mt-3">
+        <h4 class="sidebar-title"><i class="bi bi-search"></i> New Search</h4>
+        <form action="{{ url_for('search') }}" method="get">
+          <input type="hidden" name="ranking" value="{{ ranking_method }}" />
+          <input type="text" name="q" class="form-control form-control-sm mb-2"
+                 placeholder='Search again…' />
+          <button type="submit" class="btn btn-primary btn-sm w-100">Search</button>
+        </form>
+      </div>
+
+    </div><!-- /col-lg-3 -->
+
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function selectRankingRefine(btn) {
+  document.querySelectorAll('.refine-form .rank-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('refine-ranking').value = btn.dataset.value;
+}
+</script>
+{% endblock %}

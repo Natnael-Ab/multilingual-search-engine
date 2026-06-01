@@ -1,0 +1,9 @@
+Digital Technology and the Internet
+Technology
+The internet has become the most transformative technology of the modern era, fundamentally reshaping how people access information, communicate, shop, work, and entertain themselves. From its origins as a research network connecting universities and government agencies, the internet has grown into a global infrastructure used by more than five billion people. Social media platforms allow individuals to share ideas, connect with communities, and participate in public discourse at a scale and speed previously impossible.
+
+E-commerce has disrupted traditional retail, allowing consumers to purchase goods and services from anywhere in the world with a few clicks. Digital payment systems, including mobile money platforms, have extended financial services to people who previously lacked access to banking. Online education platforms democratize access to high-quality instruction, allowing learners in remote areas to study with the world's best educators.
+
+Cybersecurity has become a critical concern as more of the world's economic, social, and governmental activity moves online. Data breaches, ransomware attacks, misinformation campaigns, and surveillance threaten individual privacy and the integrity of democratic institutions. Governments and organizations invest heavily in protecting digital infrastructure and developing norms for responsible behavior in cyberspace.
+
+Artificial intelligence is being integrated into internet services at a rapid pace, powering search engines, recommendation algorithms, virtual assistants, and content moderation systems. The combination of big data, computing power, and machine learning algorithms is producing capabilities that blur the boundary between human and machine intelligence, raising profound questions about privacy, labor, and human agency.
