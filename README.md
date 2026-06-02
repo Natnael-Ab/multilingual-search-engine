@@ -2,6 +2,15 @@
 
 A multilingual Information Retrieval (IR) system that enables English and Amharic document retrieval using modern search techniques including BM25 ranking, TF-IDF ranking, query expansion, and cross-language search.
 
+## Live Demo
+
+🚀 **Live Application:** https://multilingual-search-engine-sgi5.onrender.com
+
+### Quick Links
+
+- Live Demo: https://multilingual-search-engine-sgi5.onrender.com
+- Source Code: https://github.com/Natnael-Ab/multilingual-search-engine
+
 ## Overview
 
 This project demonstrates the core concepts of Information Retrieval by implementing a complete search engine capable of retrieving relevant documents across multiple languages. The system includes document preprocessing, indexing, ranking, evaluation, and a web-based search interface.
