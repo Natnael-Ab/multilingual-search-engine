@@ -165,11 +165,15 @@
                 </span>
               </td>
               <td><div class="metric-cell">
-                <div class="metric-mini-bar"><div class="metric-mini-fill" style="width:{{ (r.precision*100)|round(0) }}%"></div></div>
+                <div class="metric-mini-bar">
+                  <div class="metric-mini-fill" data-width="{{ (r.precision*100)|round(0) }}"></div>
+                </div>
                 {{ (r.precision*100)|round(1) }}%
               </div></td>
               <td><div class="metric-cell">
-                <div class="metric-mini-bar"><div class="metric-mini-fill metric-fill-r" style="width:{{ (r.recall*100)|round(0) }}%"></div></div>
+                <div class="metric-mini-bar">
+                  <div class="metric-mini-fill metric-fill-r" data-width="{{ (r.recall*100)|round(0) }}"></div>
+                </div>
                 {{ (r.recall*100)|round(1) }}%
               </div></td>
               <td><strong>{{ (r.f1*100)|round(1) }}%</strong></td>
@@ -221,11 +225,15 @@
                 </span>
               </td>
               <td><div class="metric-cell">
-                <div class="metric-mini-bar"><div class="metric-mini-fill metric-fill-tfidf" style="width:{{ (r.precision*100)|round(0) }}%"></div></div>
+                <div class="metric-mini-bar">
+                  <div class="metric-mini-fill metric-fill-tfidf" data-width="{{ (r.precision*100)|round(0) }}"></div>
+                </div>
                 {{ (r.precision*100)|round(1) }}%
               </div></td>
               <td><div class="metric-cell">
-                <div class="metric-mini-bar"><div class="metric-mini-fill metric-fill-r" style="width:{{ (r.recall*100)|round(0) }}%"></div></div>
+                <div class="metric-mini-bar">
+                  <div class="metric-mini-fill metric-fill-r" data-width="{{ (r.recall*100)|round(0) }}"></div>
+                </div>
                 {{ (r.recall*100)|round(1) }}%
               </div></td>
               <td><strong>{{ (r.f1*100)|round(1) }}%</strong></td>
@@ -277,5 +285,10 @@ function showTab(name) {
     document.getElementById('tab-' + n).classList.toggle('active', n === name);
   });
 }
+
+// Apply dynamic widths from data attributes — avoids Jinja-in-style linter errors
+document.querySelectorAll('.metric-mini-fill[data-width]').forEach(el => {
+  el.style.width = el.dataset.width + '%';
+});
 </script>
 {% endblock %}

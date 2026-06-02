@@ -13,3 +13,5 @@ venv/
 indexes/
 
 *.sqlite3
+
+saved_indexes/

@@ -44,7 +44,7 @@
           <div class="relevance-bar-wrap">
             <span class="relevance-label">Relevance score:</span>
             <div class="relevance-bar-track">
-              <div class="relevance-bar-fill" style="width: {{ [doc.score * 40, 100] | min }}%"></div>
+              <div class="relevance-bar-fill" data-width="{{ ([doc.score * 40, 100] | min) }}"></div>
             </div>
             <span class="relevance-value">{{ doc.score }}</span>
           </div>
@@ -158,5 +158,14 @@
 
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.relevance-bar-fill').forEach(function (bar) {
+      const width = bar.dataset.width || 0;
+      bar.style.width = width + '%';
+    });
+  });
+</script>
 
 {% endblock %}

@@ -89,7 +89,7 @@
       {% if results %}
         <div class="results-list" id="results-list">
           {% for result in results %}
-          <article class="result-card" style="animation-delay: {{ loop.index0 * 0.06 }}s">
+          <article class="result-card" data-delay="{{ loop.index0 * 0.06 }}">
 
             <!-- Top row: lang + category badges, rank number -->
             <div class="result-card-top">
@@ -123,7 +123,7 @@
                 <div class="score-display">
                   <span class="score-label">Score</span>
                   <span class="score-bar-wrap">
-                    <span class="score-bar" style="width: {{ [result.score * 40, 100] | min }}%"></span>
+                    <span class="score-bar" data-width="{{ [result.score * 40, 100] | min }}"></span>
                   </span>
                   <span class="score-value">{{ result.score }}</span>
                 </div>
@@ -246,5 +246,15 @@ function selectRankingRefine(btn) {
   btn.classList.add('active');
   document.getElementById('refine-ranking').value = btn.dataset.value;
 }
+
+// Apply animation delay from data attribute — avoids Jinja-in-style linter errors
+document.querySelectorAll('.result-card[data-delay]').forEach(el => {
+  el.style.animationDelay = el.dataset.delay + 's';
+});
+
+// Apply score bar width from data attribute — avoids Jinja-in-style linter errors
+document.querySelectorAll('.score-bar[data-width]').forEach(el => {
+  el.style.width = el.dataset.width + '%';
+});
 </script>
 {% endblock %}
