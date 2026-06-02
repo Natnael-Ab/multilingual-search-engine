@@ -170,7 +170,7 @@ This project is licensed under the MIT License.
 
 ## Author
 
-Natnael Abebe
-Gebeyehu Atanaw
+- Natnael Abebe
+- Gebeyehu Atanaw
 
 Built as a multilingual Information Retrieval and Search Engine project using Python and Flask.
